@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <stdio.h>
 #include <time.h> //ใช้ในการสุ่ม
 #include <stdlib.h> 
@@ -264,3 +265,6 @@ int main(){
     
     return 0;
 }
+=======
+
+>>>>>>> 93886bbb3c2c7ed13ce860cd6fdbf76c195742d4
