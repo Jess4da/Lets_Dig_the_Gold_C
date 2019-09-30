@@ -14,9 +14,6 @@ int unavailable[64];    //สร้างตารางเก็บช่อง
 int P1Score;
 int P2Score;
 
-//จำนวนตาการเล่น
-int PTurn[2];
-
 //ฟังก์ชั่นเคลียร์สกรีน
 void clrcon(){
     system("@cls||clear");
@@ -122,7 +119,6 @@ void Draw(){
     printf("\t  -------------------------\n");
     printf("\t     \033[1;31mScore Player 2 : %d\033[0m  \n", P2Score);
     printf("\t  -------------------------\n");
-    printf("Player 1:%d Turn Left\t   Player 2:%d Turn Left\n", PTurn[0], PTurn[1]);
     printf("------------------------------------------------\n");
 
     int i;
@@ -143,9 +139,6 @@ void Draw(){
 void initial(){
     P1Score = 0;
     P2Score = 0;
-    
-    PTurn[0] = 20;
-    PTurn[1] = 20;
 
     srand ( time(NULL) );
 
@@ -217,9 +210,12 @@ int main(){
     char CArray[][10] = {
         "\033[1;36m", "\033[1;33m", "\033[1;31m"
     };
+
+    int time_take = 0;
+    int isShowTimeTake = 0;
     //ลูปเล่นเกม
 
-    while (PTurn[0] > 0 && PTurn[1] > 0){
+    while (1){
         //ลูปวาดตารางและใส่ค่า
         do{ 
             Draw(); //เรียกฟังก์ชั่นวาดตาราง
@@ -227,8 +223,23 @@ int main(){
             if (which > 0)
                 printf("%s!!Previous Player Got %s!!\033[0m\n", CArray[which-1], NArray[which-1]);
 
+            if (time_take > 0){
+                isShowTimeTake = 0;
+                printf("!!Previous Player Take %d Seconds!!\033[0m\n", (int)time_take/CLOCKS_PER_SEC);
+                if (time_take >= 20000)
+                    printf("!!Previous Player Lost all Points!!\n");
+                else if (time_take >= 10000)
+                    printf("!!Previous Player Lost 500 Points!!\n");
+                else if (time_take >= 5000)
+                    printf("!!Previous Player Lost 200 Points!!\n");
+            }
+
+            clock_t begin = clock();//เริ่มนับเวลา
             printf("Player %d Choose a Number : ", turn);
             scanf("%d", &number);
+            clock_t end = clock();//หยุดนับเวลา
+
+            time_take = end - begin;//เวลาที่ผ่านไป (Milliseconds)
 
             //เรียกใช้ฟังก์ชั่นเช็คช่องว่าง
             if (CheckAvailable(number) == 1)
@@ -242,8 +253,23 @@ int main(){
         if (P1Score >= 5000 || P2Score >= 5000)
             break;
 
+        if (time_take >= 0){
+            int PScore[2] = {P1Score, P2Score};
+            if (time_take >= 20000)
+                if (PScore[turn - 1] < 0)
+                    PScore[turn - 1] = PScore[turn - 1] * 2;
+                else
+                    PScore[turn - 1] = 0;
+            else if (time_take >= 10000)
+                PScore[turn - 1] -= 500;
+            else if (time_take >= 5000)
+                PScore[turn - 1] -= 200;
+            P1Score = PScore[0];
+            P2Score = PScore[1];
+            isShowTimeTake = 1;
+        }
+
         //สลับเทิร์นของผู่เล่น
-        PTurn[turn-1] -= 1;
         turn += 1;
         if (turn > 2)
             turn = 1;
